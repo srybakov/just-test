@@ -3,3 +3,8 @@ spring:
     url: r2dbc:pool:postgresql://localhost:5432/just-test
     username: postgres
     password: postgres
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://localhost:5432/just-test
+    user: ${spring.r2dbc.username}
+    password: ${spring.r2dbc.password}
