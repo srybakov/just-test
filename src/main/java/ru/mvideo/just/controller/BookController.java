@@ -34,19 +34,19 @@ public class BookController {
     }
 
     @PostMapping
-    public Mono<Book> createBook(@RequestBody Book book) {
+    public Mono<Integer> createBook(@RequestBody Book book) {
         return bookRepository.save(book);
     }
 
     @PutMapping("/{id}")
-    public Mono<Book> updateBook(@PathVariable(name = "id") long id, @RequestBody Mono<UpdateBookDto> updateBookDtoMono) {
+    public Mono<Integer> updateBook(@PathVariable(name = "id") long id, @RequestBody Mono<UpdateBookDto> updateBookDtoMono) {
         return bookRepository.findById(id)
                 .flatMap(bookToUpdate -> updateBookDtoMono.map(updateBookDto -> {
                     bookToUpdate.setTitle(updateBookDto.getTitle());
                     bookToUpdate.setAuthor(updateBookDto.getAuthor());
                     return bookToUpdate;
                 }))
-                .flatMap(bookRepository::save);
+                .flatMap(book -> bookRepository.update(id, book));
     }
 
     @PutMapping("/{id}/title")
