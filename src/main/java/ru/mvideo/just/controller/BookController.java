@@ -15,6 +15,7 @@ import ru.mvideo.just.dto.UpdateBookDto;
 import ru.mvideo.just.dto.UpdateBookTitleDto;
 import ru.mvideo.just.model.Book;
 import ru.mvideo.just.repository.BookRepository;
+import ru.mvideo.just.service.BookService;
 
 @RestController
 @RequestMapping(value = "/api/books")
@@ -22,6 +23,7 @@ import ru.mvideo.just.repository.BookRepository;
 public class BookController {
 
     private final BookRepository bookRepository;
+    private final BookService bookService;
 
     @GetMapping
     public Flux<Book> getAll() {
@@ -40,13 +42,7 @@ public class BookController {
 
     @PutMapping("/{id}")
     public Mono<Integer> updateBook(@PathVariable(name = "id") long id, @RequestBody Mono<UpdateBookDto> updateBookDtoMono) {
-        return bookRepository.findById(id)
-                .flatMap(bookToUpdate -> updateBookDtoMono.map(updateBookDto -> {
-                    bookToUpdate.setTitle(updateBookDto.getTitle());
-                    bookToUpdate.setAuthor(updateBookDto.getAuthor());
-                    return bookToUpdate;
-                }))
-                .flatMap(book -> bookRepository.update(id, book));
+        return bookService.updateBook(id, updateBookDtoMono);
     }
 
     @PutMapping("/{id}/title")
