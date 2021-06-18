@@ -14,48 +14,57 @@ import reactor.core.publisher.Mono;
 import ru.mvideo.just.dto.UpdateBookDto;
 import ru.mvideo.just.dto.UpdateBookTitleDto;
 import ru.mvideo.just.model.Book;
-import ru.mvideo.just.repository.BookRepository;
+import ru.mvideo.just.service.BookService;
 
 @RestController
 @RequestMapping(value = "/api/books")
 @RequiredArgsConstructor
 public class BookController {
 
-    private final BookRepository bookRepository;
+    private final BookService bookService;
 
     @GetMapping
     public Flux<Book> getAll() {
-        return bookRepository.findAll();
+        return bookService.getAll();
     }
 
     @GetMapping("/author/{author}")
     public Flux<Book> getByAuthor(@PathVariable(name = "author") String author) {
-        return bookRepository.findByAuthor(author);
+        return bookService.getByAuthor(author);
     }
 
     @PostMapping
     public Mono<Book> createBook(@RequestBody Book book) {
-        return bookRepository.save(book);
+        return bookService.createBook(book);
     }
 
     @PutMapping("/{id}")
     public Mono<Book> updateBook(@PathVariable(name = "id") long id, @RequestBody Mono<UpdateBookDto> updateBookDtoMono) {
-        return bookRepository.findById(id)
-                .flatMap(bookToUpdate -> updateBookDtoMono.map(updateBookDto -> {
-                    bookToUpdate.setTitle(updateBookDto.getTitle());
-                    bookToUpdate.setAuthor(updateBookDto.getAuthor());
-                    return bookToUpdate;
-                }))
-                .flatMap(bookRepository::save);
+        return bookService.updateBook(id, updateBookDtoMono);
     }
 
     @PutMapping("/{id}/title")
     public Mono<Integer> updateBookTitle(@PathVariable(name = "id") long id, @RequestBody UpdateBookTitleDto bookTitleDto) {
-        return bookRepository.updateTitle(id, bookTitleDto.getTitle());
+        return bookService.updateBookTitle(id, bookTitleDto.getTitle());
     }
 
     @DeleteMapping("/{id}")
     public Mono<Void> deleteBook(@PathVariable(name = "id") long id) {
-        return bookRepository.deleteById(id);
+        return bookService.deleteBook(id);
+    }
+
+    @PostMapping("/testUpdateInOneTransaction/{id}")
+    public Mono<Integer> testOneTransaction(@PathVariable(name = "id") long id) {
+        return bookService.testOneTransaction(id);
+    }
+
+    @PostMapping("/testManyTransaction/{id}")
+    public Mono<Integer> testManyTransaction(@PathVariable(name = "id") long id) {
+        return bookService.testManyTransaction(id);
+    }
+
+    @PostMapping("/testOneTransactionRollback/{id}")
+    public Mono<Void> testOneTransactionRollback(@PathVariable(name = "id") long id) {
+        return bookService.testOneTransactionRollback(id);
     }
 }
