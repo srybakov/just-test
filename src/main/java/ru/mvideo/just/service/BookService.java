@@ -93,11 +93,14 @@ public class BookService {
 
     /**
      * Показываем что  Rollback для транзакций работает
+     * Если убрать @Transactional, то поле в БД обновится, с @Transactional - нет, т.к идет откат
      */
     @Transactional
-    public Mono<Void> testOneTransactionRollback(long id) {
-        updateBook(id, Mono.just(UpdateBookDto.builder().author("updated author 1").title("updated title 1").build()));
-        updateBook(id, Mono.just(UpdateBookDto.builder().author("updated author 2").title("updated title 2").build()));
-        throw new IllegalStateException();
+    public Mono<Object> testOneTransactionRollback(long id) {
+        return updateBookTitle(id, "title 12")
+                .then(updateBookTitle(id, "title 13"))
+                .then(updateBookTitle(id, "title 14"))
+                .then(Mono.empty())
+                .switchIfEmpty(Mono.error(new RuntimeException()));
     }
 }

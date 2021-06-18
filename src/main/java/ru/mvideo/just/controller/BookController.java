@@ -64,7 +64,7 @@ public class BookController {
     }
 
     @PostMapping("/testOneTransactionRollback/{id}")
-    public Mono<Void> testOneTransactionRollback(@PathVariable(name = "id") long id) {
+    public Mono<Object> testOneTransactionRollback(@PathVariable(name = "id") long id) {
         return bookService.testOneTransactionRollback(id);
     }
 }
